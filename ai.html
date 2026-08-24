@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sule_Old_Photos — Luminous Photo Sharing</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Socket.io Client CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <!-- Serif Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            obsidian: '#050505',
+            cream: '#FBFBF9',
+            cardDark: '#121214',
+            accent: '#8B5CF6',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Premium overlay animations and custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050505;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E1E20;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8B5CF6;
+    }
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: flex;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+  </style>
+</head>
+<body class="bg-obsidian text-slate-100 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- ========================================== -->
+  <!-- 1. LANDING/WELCOME SCREEN -->
+  <!-- ========================================== -->
+  <div id="screen-landing" class="screen active flex-col min-h-screen justify-between p-8 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08)_0%,transparent_60%)]">
+    <div class="flex flex-col items-center mt-20">
+      <span class="font-serif text-7xl font-light tracking-widest text-slate-100">Æ</span>
+      <span class="text-[10px] tracking-[4px] text-accent font-bold mt-2">Sule_Old_Photos</span>
+    </div>
+
+    <div class="flex flex-col items-center text-center my-8 max-w-md mx-auto">
+      <h1 class="font-serif text-4xl font-light tracking-wide mb-4 leading-tight">Visual Stories, Luminous Minds</h1>
+      <p class="text-slate-400 text-sm leading-relaxed px-4">
+        A premium, high-contrast gallery network designed for curators, architectural visualizers, and minimalists.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-3 w-full max-w-xs mx-auto mb-12">
+      <button onclick="navigate('register')" class="h-12 rounded-full bg-accent text-white font-semibold text-sm hover:bg-violet-500 transition shadow-lg shadow-violet-500/20">Get Started</button>
+      <button onclick="navigate('login')" class="h-12 rounded-full border border-zinc-800 text-slate-200 font-semibold text-sm hover:bg-zinc-900 transition">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. LOGIN SCREEN -->
+  <!-- ========================================== -->
+  <div id="screen-login" class="screen flex-col min-h-screen p-6 justify-between">
+    <div class="flex items-center justify-between pt-4">
+      <button onclick="navigate('landing')" class="p-2 -ml-2 text-slate-400 hover:text-white"><i data-lucide="chevron-left"></i></button>
+      <span class="font-serif text-2xl font-light">Æ</span>
+      <div class="w-8"></div>
+    </div>
+
+    <div class="w-full max-w-sm mx-auto my-auto py-8">
+      <h2 class="font-serif text-3xl font-light mb-2">Welcome Back</h2>
+      <p class="text-slate-400 text-xs mb-8">Log into Sule_Old_Photos to discover visual inspirations.</p>
+
+      <div id="login-error" class="hidden p-3 mb-6 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-semibold"></div>
+
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-5">
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">USERNAME OR EMAIL</label>
+          <input type="text" id="login-username" class="w-full h-12 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="e.g. visual_muse" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">PASSWORD</label>
+          <input type="password" id="login-password" class="w-full h-12 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="w-full h-12 rounded-full bg-accent text-white font-semibold text-sm hover:bg-violet-500 transition mt-6">Sign In</button>
+      </form>
+    </div>
+
+    <div class="flex justify-center items-center py-6 text-sm text-slate-400">
+      <span>Don't have an account?</span>
+      <button onclick="navigate('register')" class="text-accent font-bold ml-2 hover:underline">Sign Up</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. REGISTER SCREEN -->
+  <!-- ========================================== -->
+  <div id="screen-register" class="screen flex-col min-h-screen p-6 justify-between">
+    <div class="flex items-center justify-between pt-4">
+      <button onclick="navigate('landing')" class="p-2 -ml-2 text-slate-400 hover:text-white"><i data-lucide="chevron-left"></i></button>
+      <span class="font-serif text-2xl font-light">Æ</span>
+      <div class="w-8"></div>
+    </div>
+
+    <div class="w-full max-w-sm mx-auto my-6 overflow-y-auto max-h-[80vh] pr-1">
+      <h2 class="font-serif text-3xl font-light mb-2">Create Account</h2>
+      <p class="text-slate-400 text-xs mb-8">Join Sule_Old_Photos to connect with photographers worldwide.</p>
+
+      <div id="register-error" class="hidden p-3 mb-6 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-semibold"></div>
+
+      <form onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">USERNAME *</label>
+          <input type="text" id="reg-username" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="username" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">DISPLAY NAME *</label>
+          <input type="text" id="reg-displayname" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="Evelyn Carter" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">EMAIL ADDRESS *</label>
+          <input type="email" id="reg-email" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="email@example.com" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">PASSWORD *</label>
+          <input type="password" id="reg-password" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="At least 6 characters" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">PUT YOUR INDEX NUMBER OF CLASS OF 2020 *</label>
+          <input type="text" id="reg-code" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="e.g. 05" maxlength="2" required>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">BIO</label>
+          <textarea id="reg-bio" class="w-full py-3 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent h-20 resize-none" placeholder="Tell the community about your style..."></textarea>
+        </div>
+        <div>
+          <label class="block text-[10px] tracking-wider font-bold text-slate-400 mb-2">WEBSITE</label>
+          <input type="text" id="reg-website" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="e.g. evelyncarter.co">
+        </div>
+        <button type="submit" class="w-full h-12 rounded-full bg-accent text-white font-semibold text-sm hover:bg-violet-500 transition mt-6">Create Account</button>
+      </form>
+    </div>
+
+    <div class="flex justify-center items-center py-4 text-sm text-slate-400">
+      <span>Already have an account?</span>
+      <button onclick="navigate('login')" class="text-accent font-bold ml-2 hover:underline">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3.5 OTP VERIFICATION SCREEN -->
+  <!-- ========================================== -->
+  <div id="screen-verify" class="screen flex-col min-h-screen p-6 justify-between">
+    <div class="flex items-center justify-between pt-4">
+      <button onclick="navigate('register')" class="p-2 -ml-2 text-slate-400 hover:text-white"><i data-lucide="chevron-left"></i></button>
+      <span class="font-serif text-2xl font-light">S</span>
+      <div class="w-8"></div>
+    </div>
+
+    <div class="w-full max-w-sm mx-auto my-auto py-8 text-center">
+      <div class="w-16 h-16 bg-accent/10 border border-accent/20 rounded-full flex items-center justify-center mx-auto mb-6 text-accent animate-pulse">
+        <i data-lucide="mail" class="w-8 h-8"></i>
+      </div>
+      <h2 class="font-serif text-3xl font-light mb-2">Check Your Email</h2>
+      <p class="text-slate-400 text-xs mb-8">We have sent a 6-digit OTP verification code to activate your account. Enter it below.</p>
+
+      <div id="verify-error" class="hidden p-3 mb-6 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-semibold"></div>
+
+      <form onsubmit="handleVerifySubmit(event)" class="space-y-6">
+        <div class="flex justify-center gap-2">
+          <input type="text" id="verify-otp" class="w-full h-14 bg-zinc-950 border border-zinc-850 rounded-xl text-center text-xl font-bold tracking-widest text-slate-100 outline-none focus:border-accent" placeholder="123456" maxlength="6" required>
+        </div>
+        <button type="submit" class="w-full h-12 rounded-full bg-accent text-white font-semibold text-sm hover:bg-violet-500 transition mt-6">Verify Account</button>
+      </form>
+    </div>
+
+    <div class="flex justify-center items-center py-6 text-sm text-slate-400">
+      <span>Didn't receive the code?</span>
+      <button onclick="alert('For local development, check the backend console log for the generated OTP verification code!')" class="text-accent font-bold ml-2 hover:underline">Resend OTP</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. ONBOARDING SCREEN -->
+  <!-- ========================================== -->
+  <div id="screen-onboarding" class="screen flex-col min-h-screen p-6 justify-between">
+    <div class="pt-6">
+      <span class="text-[10px] font-bold text-accent tracking-widest block mb-2">STEP 1 OF 2</span>
+      <h2 class="font-serif text-3xl font-light mb-1">Whom photos do you prefer?</h2>
+      <p class="text-slate-400 text-xs">Select creators whose styles you want to follow.</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 my-6 max-w-sm mx-auto w-full">
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Suleban</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">MD subane</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Boxer</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Shebaa</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Adesh</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Abdalla</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Maqhrib_labiste</button>
+      <button onclick="toggleOnboardTag(this)" class="p-4 rounded-xl border border-zinc-850 bg-cardDark text-left hover:border-accent hover:bg-violet-500/10 transition text-sm font-semibold">Others</button>
+    </div>
+
+    <button onclick="finishOnboarding()" class="w-full max-w-sm mx-auto h-12 rounded-full bg-accent text-white font-semibold text-sm hover:bg-violet-500 transition">Enter</button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. MAIN CORE SHELL (WITH BOTTOM TAB NAV) -->
+  <!-- ========================================== -->
+  <div id="screen-main" class="screen flex-col flex-1 min-h-screen">
+    <!-- Header top bar -->
+    <header class="h-16 px-4 border-b border-zinc-900 flex items-center justify-between sticky top-0 bg-obsidian z-10">
+      <h1 class="font-serif text-lg tracking-[4px] font-light">Sule_Old_Photos</h1>
+      <div class="flex items-center gap-4">
+        <button onclick="navigateTab('admin')" id="admin-cog" class="hidden p-2 text-slate-400 hover:text-white"><i data-lucide="shield-check"></i></button>
+        <button onclick="openMessaging()" class="p-2 text-slate-400 hover:text-white"><i data-lucide="send"></i></button>
+      </div>
+    </header>
+
+    <!-- TAB 1: HOME FEED -->
+    <div id="tab-home" class="tab-content flex-col flex-1 pb-20">
+      <!-- Stories list -->
+      <div id="stories-feed" class="flex gap-4 p-4 border-b border-zinc-900 overflow-x-auto whitespace-nowrap">
+        <!-- Self Story placeholder -->
+        <div onclick="alert('Uploading story from client is simulated via file upload.')" class="flex flex-col items-center shrink-0 cursor-pointer">
+          <div class="w-14 h-14 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center p-0.5">
+            <div class="w-full h-full bg-zinc-900 rounded-full flex items-center justify-center text-slate-400 text-lg font-bold">+</div>
+          </div>
+          <span class="text-[10px] text-slate-400 mt-1">Add Story</span>
+        </div>
+        <!-- Loaded Stories group circles here -->
+      </div>
+      <!-- Posts feed list -->
+      <div id="posts-feed" class="flex flex-col">
+        <!-- Feed Post cards rendered here -->
+      </div>
+    </div>
+
+    <!-- TAB 2: EXPLORE SEARCH GRID -->
+    <div id="tab-explore" class="tab-content hidden flex-col flex-1 p-4 pb-20">
+      <div class="flex items-center bg-cardDark border border-zinc-850 rounded-full h-11 px-4 mb-4">
+        <i data-lucide="search" class="text-zinc-500 w-4 h-4 mr-2"></i>
+        <input type="text" id="explore-search" oninput="handleSearchQuery(this.value)" class="bg-transparent flex-1 outline-none text-sm text-slate-100" placeholder="Search creators, hashtags, posts...">
+      </div>
+
+      <!-- Suggestion Search lists -->
+      <div id="explore-results" class="hidden flex-col space-y-4 mb-4"></div>
+
+      <!-- Default Grid masonry -->
+      <h3 class="text-xs font-bold text-slate-400 tracking-wider mb-3">DISCOVER VISUALS</h3>
+      <div id="explore-grid" class="grid grid-cols-3 gap-1"></div>
+    </div>
+
+    <!-- TAB 3: UPLOAD NEW PHOTO -->
+    <div id="tab-upload" class="tab-content hidden flex-col flex-1 p-5 pb-20 max-w-md mx-auto w-full">
+      <h2 class="font-serif text-2xl font-light mb-6">New Publication</h2>
+      <div id="upload-error" class="hidden p-3 mb-4 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-semibold"></div>
+
+      <div class="space-y-5">
+        <div class="border border-dashed border-zinc-800 bg-cardDark h-48 rounded-xl flex flex-col items-center justify-center p-6 text-center cursor-pointer relative" onclick="triggerFileInput()">
+          <input type="file" id="upload-file-input" onchange="previewSelectedFile(event)" class="hidden" accept="image/*">
+          <img id="upload-preview-img" class="hidden absolute inset-0 w-full h-full object-contain rounded-xl">
+          <div id="upload-placeholder-content" class="flex flex-col items-center">
+            <i data-lucide="image" class="text-zinc-600 w-10 h-10 mb-2"></i>
+            <span class="text-sm font-semibold">Select Photo</span>
+            <span class="text-xs text-zinc-500 mt-1">High-resolution JPG, PNG or WEBP</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 tracking-wider mb-2">CAPTION & HASHTAGS</label>
+          <textarea id="upload-caption" class="w-full py-3 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent h-20 resize-none" placeholder="Describe the aesthetic, add #hashtags..."></textarea>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 tracking-wider mb-2">LOCATION</label>
+          <input type="text" id="upload-location" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="e.g. Kyoto, Japan">
+        </div>
+        <button id="upload-publish-btn" onclick="publishPost()" class="w-full h-12 bg-accent rounded-full text-white font-semibold text-sm hover:bg-violet-500 transition">Publish Post</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: ACTIVITY NOTIFICATIONS -->
+    <div id="tab-activity" class="tab-content hidden flex-col flex-1 p-4 pb-20">
+      <div class="flex items-center justify-between mb-4 border-b border-zinc-900 pb-3">
+        <h3 class="font-serif text-lg">Activity</h3>
+        <button onclick="markAllNotificationsRead()" class="text-xs text-accent font-bold hover:underline">Mark all read</button>
+      </div>
+      <div id="notifications-list" class="flex flex-col divide-y divide-zinc-900">
+        <!-- Notification list rows rendered here -->
+      </div>
+    </div>
+
+    <!-- TAB 5: PROFILE GRID -->
+    <div id="tab-profile" class="tab-content hidden flex-col flex-1 pb-20">
+      <!-- Profile Header Details -->
+      <div id="profile-meta" class="p-5 border-b border-zinc-900 flex flex-col">
+        <!-- Top Stats Row -->
+        <div class="flex items-center">
+          <img id="profile-avatar" src="" class="w-16 h-16 rounded-full object-cover mr-6 border border-zinc-800">
+          <div class="flex-1 flex justify-around">
+            <div class="text-center">
+              <span id="stat-posts" class="block font-bold text-sm">0</span>
+              <span class="text-[10px] text-slate-400">Publications</span>
+            </div>
+            <div class="text-center cursor-pointer" onclick="alert('Seeded follower accounts list')">
+              <span id="stat-followers" class="block font-bold text-sm">0</span>
+              <span class="text-[10px] text-slate-400">Followers</span>
+            </div>
+            <div class="text-center cursor-pointer" onclick="alert('Seeded following accounts list')">
+              <span id="stat-following" class="block font-bold text-sm">0</span>
+              <span class="text-[10px] text-slate-400">Following</span>
+            </div>
+          </div>
+        </div>
+        <!-- Bio Name details -->
+        <div class="mt-4">
+          <h2 id="profile-displayname" class="font-bold text-sm"></h2>
+          <span id="profile-username" class="text-xs text-slate-400 block mb-2"></span>
+          <p id="profile-bio" class="text-xs text-slate-300 leading-relaxed"></p>
+          <a id="profile-website" href="#" class="text-xs text-accent font-semibold mt-1 block"></a>
+        </div>
+        <!-- Actions button togglers -->
+        <div class="flex gap-2 mt-4">
+          <button id="profile-follow-toggle-btn" onclick="toggleProfileFollow()" class="hidden flex-1 h-9 rounded bg-accent text-white text-xs font-semibold hover:bg-violet-500 transition">Follow</button>
+          <button id="profile-edit-btn" onclick="openEditProfileModal()" class="flex-1 h-9 rounded border border-zinc-850 text-slate-200 text-xs font-semibold hover:bg-zinc-900 transition">Edit Profile</button>
+          <button onclick="handleLogout()" class="px-4 h-9 rounded bg-red-500/15 text-red-400 border border-red-500/10 hover:bg-red-500/25 transition text-xs font-semibold">Log Out</button>
+        </div>
+      </div>
+      <!-- User Publications Grid -->
+      <div id="profile-grid" class="grid grid-cols-3 gap-1 p-1"></div>
+    </div>
+
+    <!-- TAB 6: ADMIN CONSOLE -->
+    <div id="tab-admin" class="tab-content hidden flex-col flex-1 p-5 pb-20 max-w-4xl mx-auto w-full">
+      <div class="flex items-center gap-2 mb-6">
+        <i data-lucide="shield-check" class="text-accent w-6 h-6"></i>
+        <h2 class="font-serif text-2xl font-light">Operations Console</h2>
+      </div>
+
+      <!-- Metrics Snapshot Cards -->
+      <div class="grid grid-cols-3 gap-4 mb-8" id="admin-metrics-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Moderation queue list -->
+      <h3 class="text-sm font-bold text-slate-400 tracking-wider mb-4">OPEN MODERATION QUEUE</h3>
+      <div id="admin-reports-container" class="flex flex-col space-y-4">
+        <!-- Moderation cards go here -->
+      </div>
+    </div>
+
+    <!-- TAB 7: MESSAGING DIRECT CHATS -->
+    <div id="tab-chat" class="tab-content hidden flex-col flex-1 pb-20">
+      <div class="flex items-center justify-between p-4 border-b border-zinc-900">
+        <h3 class="font-serif text-lg">Direct Messages</h3>
+        <button onclick="startNewChat()" class="p-2 text-slate-400 hover:text-white"><i data-lucide="message-square-plus"></i></button>
+      </div>
+      <div id="chats-list" class="flex flex-col divide-y divide-zinc-900">
+        <!-- DM conversation lines go here -->
+      </div>
+    </div>
+
+    <!-- TAB 8: DIRECT CHAT ACTIVE ROOM -->
+    <div id="tab-chatroom" class="tab-content hidden flex-col flex-1 h-[80vh] justify-between pb-20">
+      <div class="flex items-center p-3 border-b border-zinc-900 gap-3">
+        <button onclick="navigateTab('chat')" class="p-1 text-slate-400 hover:text-white"><i data-lucide="arrow-left"></i></button>
+        <img id="chatroom-avatar" class="w-8 h-8 rounded-full object-cover">
+        <div>
+          <h4 id="chatroom-title" class="font-bold text-xs"></h4>
+          <span id="chatroom-status" class="text-[9px] text-green-400 font-semibold">Active Now</span>
+        </div>
+      </div>
+      <!-- Messages stream logs -->
+      <div id="chatroom-stream" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
+        <!-- Message logs go here -->
+      </div>
+      <!-- Message compose inputs bar -->
+      <div class="p-3 border-t border-zinc-900 flex items-center gap-2 bg-obsidian">
+        <input type="text" id="chat-input-text" onkeypress="handleChatKeyPress(event)" class="flex-1 bg-cardDark border border-zinc-850 h-10 px-4 rounded-full text-xs text-slate-200 outline-none focus:border-accent" placeholder="Compose dialogue...">
+        <button onclick="sendChatMessage()" class="w-10 h-10 bg-accent rounded-full flex items-center justify-center hover:bg-violet-500 transition text-white"><i data-lucide="send" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Tabs Bar -->
+    <nav class="h-16 border-t border-zinc-900 fixed bottom-0 left-0 right-0 bg-obsidian flex justify-around items-center safe-bottom z-10">
+      <button onclick="navigateTab('home')" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-100" id="tab-btn-home">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[9px] font-semibold">Home</span>
+      </button>
+      <button onclick="navigateTab('explore')" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400" id="tab-btn-explore">
+        <i data-lucide="search" class="w-5 h-5"></i>
+        <span class="text-[9px] font-semibold">Explore</span>
+      </button>
+      <button onclick="navigateTab('upload')" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400" id="tab-btn-upload">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        <span class="text-[9px] font-semibold">Upload</span>
+      </button>
+      <button onclick="navigateTab('activity')" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400 relative" id="tab-btn-activity">
+        <i data-lucide="bell" class="w-5 h-5"></i>
+        <span class="text-[9px] font-semibold">Activity</span>
+        <div id="badge-count-activity" class="hidden absolute top-0.5 right-2 bg-accent text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full scale-75">0</div>
+      </button>
+      <button onclick="navigateTab('profile')" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400" id="tab-btn-profile">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-[9px] font-semibold">Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. POST DETAIL MODAL WINDOW -->
+  <!-- ========================================== -->
+  <div id="modal-post" class="hidden fixed inset-0 z-50 bg-black/85 items-center justify-center p-4">
+    <div class="bg-cardDark border border-zinc-850 rounded-2xl w-full max-w-xl overflow-hidden flex flex-col relative max-h-[90vh]">
+      <button onclick="closePostDetail()" class="absolute top-4 right-4 bg-black/60 w-8 h-8 rounded-full flex items-center justify-center hover:bg-black transition text-slate-200 z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
+      
+      <div class="overflow-y-auto flex-1">
+        <!-- Post header -->
+        <div class="p-4 border-b border-zinc-900 flex items-center gap-3">
+          <img id="detail-avatar" class="w-9 h-9 rounded-full object-cover">
+          <div>
+            <h4 id="detail-name" class="font-bold text-sm"></h4>
+            <span id="detail-location" class="text-[10px] text-accent font-semibold block"></span>
+          </div>
+        </div>
+
+        <!-- Post Image -->
+        <div class="bg-black flex items-center justify-center">
+          <img id="detail-img" class="w-full object-contain max-h-[50vh]">
+        </div>
+
+        <!-- Post stats / actions -->
+        <div class="p-4 flex items-center justify-between border-b border-zinc-900">
+          <div class="flex items-center gap-4">
+            <button id="detail-like-btn" onclick="togglePostLike()" class="p-1 hover:scale-105 transition"><i data-lucide="heart" class="w-6 h-6"></i></button>
+            <span id="detail-likes-count" class="text-sm font-bold"></span>
+          </div>
+        </div>
+
+        <!-- Critique Comments Thread -->
+        <div class="p-4">
+          <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-4">THREADED CRITIQUE</h4>
+          <div id="detail-comments" class="space-y-4 mb-4"></div>
+        </div>
+      </div>
+
+      <!-- Add Critique Input -->
+      <div class="p-3 border-t border-zinc-900 bg-zinc-950 flex items-center gap-2">
+        <input type="text" id="detail-comment-input" class="flex-1 bg-cardDark border border-zinc-850 h-10 px-4 rounded-full text-xs text-slate-200 outline-none focus:border-accent" placeholder="Add critique critique...">
+        <button onclick="submitDetailComment()" class="px-4 h-10 bg-accent rounded-full text-xs font-bold text-white hover:bg-violet-500 transition">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6.5 EDIT PROFILE MODAL WINDOW -->
+  <!-- ========================================== -->
+  <div id="modal-edit-profile" class="hidden fixed inset-0 z-50 bg-black/85 items-center justify-center p-4">
+    <div class="bg-cardDark border border-zinc-850 rounded-2xl w-full max-w-md overflow-hidden flex flex-col relative max-h-[90vh]">
+      <button onclick="closeEditProfileModal()" class="absolute top-4 right-4 bg-black/60 w-8 h-8 rounded-full flex items-center justify-center hover:bg-black transition text-slate-200 z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
+      
+      <div class="overflow-y-auto flex-1 p-6">
+        <h3 class="font-serif text-2xl font-light mb-6 text-center text-slate-100">Edit Profile</h3>
+        <div id="edit-profile-error" class="hidden p-3 mb-4 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-semibold"></div>
+
+        <form onsubmit="handleEditProfileSubmit(event)" class="space-y-4">
+          <!-- Avatar picker -->
+          <div class="flex flex-col items-center mb-4">
+            <div class="relative cursor-pointer w-20 h-20" onclick="triggerEditAvatarInput()">
+              <img id="edit-profile-avatar-preview" src="" class="w-full h-full rounded-full object-cover border border-zinc-800">
+              <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-[10px] font-bold text-white opacity-0 hover:opacity-100 transition">Change</div>
+            </div>
+            <input type="file" id="edit-profile-avatar-input" onchange="previewEditAvatar(event)" class="hidden" accept="image/*">
+            <span class="text-xs text-slate-400 mt-2">Change Profile Photo</span>
+          </div>
+
+          <!-- Display Name -->
+          <div>
+            <label class="block text-[9px] font-bold text-slate-400 tracking-wider mb-2">NAME</label>
+            <input type="text" id="edit-profile-displayname" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="Display Name">
+          </div>
+
+          <!-- Website -->
+          <div>
+            <label class="block text-[9px] font-bold text-slate-400 tracking-wider mb-2">WEBSITE</label>
+            <input type="text" id="edit-profile-website" class="w-full h-11 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent" placeholder="Website URL">
+          </div>
+
+          <!-- Bio -->
+          <div>
+            <label class="block text-[9px] font-bold text-slate-400 tracking-wider mb-2">BIO</label>
+            <textarea id="edit-profile-bio" class="w-full py-3 px-4 bg-zinc-950 border border-zinc-850 rounded-lg text-sm text-slate-100 outline-none focus:border-accent h-20 resize-none" placeholder="Tell the community about yourself..."></textarea>
+          </div>
+
+          <!-- Account Privacy -->
+          <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-lg border border-zinc-900">
+            <div>
+              <span class="block text-xs font-semibold text-slate-200">Private Account</span>
+              <span class="text-[9px] text-slate-500">Only approved curators can see your photos.</span>
+            </div>
+            <input type="checkbox" id="edit-profile-private" class="w-4 h-4 accent-accent">
+          </div>
+
+          <!-- Simulated Fields for Instagram/TikTok look -->
+          <div class="border-t border-zinc-900 pt-4 space-y-4">
+            <span class="text-[9px] font-bold text-slate-500 tracking-wider block">PRIVATE INFORMATION (SIMULATED)</span>
+            
+            <div>
+              <label class="block text-[9px] font-bold text-slate-500 mb-1">GENDER</label>
+              <select id="edit-profile-gender" class="w-full h-10 px-3 bg-zinc-950 border border-zinc-850 rounded text-xs text-slate-300 outline-none">
+                <option value="not-specified">Not Specified</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[9px] font-bold text-slate-500 mb-1">PHONE NUMBER</label>
+              <input type="text" id="edit-profile-phone" class="w-full h-10 px-3 bg-zinc-950 border border-zinc-850 rounded text-xs text-slate-300 outline-none" placeholder="+1 234 567 8900">
+            </div>
+
+            <div>
+              <label class="block text-[9px] font-bold text-slate-500 mb-1">CATEGORY</label>
+              <input type="text" id="edit-profile-category" class="w-full h-10 px-3 bg-zinc-950 border border-zinc-850 rounded text-xs text-slate-300 outline-none" placeholder="Photographer / Visual Creator">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full h-11 bg-accent rounded-full text-white font-semibold text-xs hover:bg-violet-500 transition mt-6">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6.8 FLOATING CHATBOT WIDGET -->
+  <!-- ========================================== -->
+  <!-- Chatbot FAB -->
+  <button onclick="toggleChatbotPanel()" id="chatbot-fab" class="fixed bottom-20 right-6 w-14 h-14 bg-accent text-white rounded-full flex items-center justify-center shadow-xl shadow-accent/25 hover:scale-105 hover:bg-violet-500 transition z-40">
+    <i data-lucide="message-circle" class="w-6 h-6"></i>
+  </button>
+
+  <!-- Chatbot Window Panel -->
+  <div id="chatbot-panel" class="hidden fixed bottom-36 right-6 w-80 h-[400px] bg-cardDark border border-zinc-850 rounded-2xl shadow-2xl flex-col overflow-hidden z-40">
+    <!-- Header -->
+    <div class="h-12 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between px-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+        <span class="text-xs font-bold text-slate-200">Sule_Old_Photos Assistant</span>
+      </div>
+      <button onclick="toggleChatbotPanel()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <!-- Message Logs -->
+    <div id="chatbot-messages" class="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col text-xs">
+      <!-- Default Bot Welcome -->
+      <div class="self-start max-w-[85%] p-3 bg-zinc-900 border border-zinc-850 rounded-2xl rounded-bl-none text-slate-300">
+        Hello! I am the Class of 2020 chatbot. Ask me anything about classmate codes, photos, or creators of this app!
+      </div>
+    </div>
+
+    <!-- Input Composer -->
+    <div class="p-2 border-t border-zinc-900 bg-zinc-950 flex items-center gap-2">
+      <input type="text" id="chatbot-input" onkeypress="handleChatbotKeyPress(event)" class="flex-1 bg-cardDark border border-zinc-850 h-9 px-3 rounded-full text-xs text-slate-200 outline-none focus:border-accent" placeholder="Type name, code...">
+      <button onclick="sendChatbotMessage()" class="w-9 h-9 bg-accent rounded-full flex items-center justify-center hover:bg-violet-500 transition text-white"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. CORE SCRIPT CONTROL -->
+  <!-- ========================================== -->
+  <script>
+    const API_URL = 'http://localhost:4000';
+    let currentToken = localStorage.getItem('Sule_Old_Photos_token');
+    let currentUser = localStorage.getItem('Sule_Old_Photos_user') ? JSON.parse(localStorage.getItem('Sule_Old_Photos_user')) : null;
+    let socket = null;
+
+    // Active state routing
+    let activePostId = null;
+    let activeChatRoomId = null;
+
+    // File upload memory storage
+    let selectedUploadFile = null;
+
+    // Run on startup
+    window.onload = () => {
+      // Re-initialize Lucide Icons
+      lucide.createIcons();
+
+      if (currentToken && currentUser) {
+        initSession();
+      } else {
+        navigate('landing');
+      }
+    };
+
+    function navigate(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`screen-${screenId}`);
+      if (target) {
+        target.classList.add('active');
+      }
+    }
+
+    function navigateTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      // Update Nav Button colors
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.classList.remove('text-slate-100');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('text-slate-100');
+      }
+
+      // Re-trigger visual loaders
+      if (tabId === 'home') {
+        loadHomeFeed();
+      } else if (tabId === 'explore') {
+        loadExploreFeed();
+      } else if (tabId === 'activity') {
+        loadNotificationsList();
+      } else if (tabId === 'profile') {
+        loadOwnProfile();
+      } else if (tabId === 'admin') {
+        loadAdminConsole();
+      } else if (tabId === 'chat') {
+        loadDMInbox();
+      }
+    }
+
+    function initSession() {
+      navigate('main');
+      navigateTab('home');
+
+      // Setup live badge notifications counts
+      fetchBadgeCount();
+      setInterval(fetchBadgeCount, 15000);
+
+      // Show Admin Panel option if admin user
+      if (currentUser && currentUser.role === 'ADMIN') {
+        document.getElementById('admin-cog').classList.remove('hidden');
+      } else {
+        document.getElementById('admin-cog').classList.add('hidden');
+      }
+
+      // Setup Socket Connection
+      initSocket();
+    }
+
+    function initSocket() {
+      if (socket) socket.disconnect();
+      socket = io(API_URL);
+
+      socket.on('connect', () => {
+        socket.emit('authenticate', currentUser.id);
+      });
+
+      // Handle real-time direct messages
+      socket.on('new_notification', (notification) => {
+        fetchBadgeCount();
+        loadNotificationsList();
+      });
+    }
+
+    // AUTH API CALLS
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const loginErr = document.getElementById('login-error');
+      loginErr.classList.add('hidden');
+
+      const usernameOrEmail = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usernameOrEmail, password })
+        });
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.error || 'Login failed');
+
+        currentToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('Sule_Old_Photos_token', data.token);
+        localStorage.setItem('Sule_Old_Photos_user', JSON.stringify(data.user));
+
+        initSession();
+      } catch (err) {
+        loginErr.innerText = err.message;
+        loginErr.classList.remove('hidden');
+      }
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const regErr = document.getElementById('register-error');
+      regErr.classList.add('hidden');
+
+      const username = document.getElementById('reg-username').value;
+      const displayName = document.getElementById('reg-displayname').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const bio = document.getElementById('reg-bio').value;
+      const website = document.getElementById('reg-website').value;
+      const verificationCode = document.getElementById('reg-code').value;
+
+      try {
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('displayName', displayName);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('bio', bio);
+        formData.append('website', website);
+        formData.append('verificationCode', verificationCode);
+
+        const response = await fetch(`${API_URL}/api/auth/register`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Registration failed');
+
+        currentToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('Sule_Old_Photos_token', data.token);
+        localStorage.setItem('Sule_Old_Photos_user', JSON.stringify(data.user));
+
+        // Proceed directly to onboarding checklist (already verified!)
+        navigate('onboarding');
+      } catch (err) {
+        regErr.innerText = err.message;
+        regErr.classList.remove('hidden');
+      }
+    }
+
+    async function handleVerifySubmit(e) {
+      e.preventDefault();
+      const verifyErr = document.getElementById('verify-error');
+      verifyErr.classList.add('hidden');
+
+      const code = document.getElementById('verify-otp').value.trim();
+
+      try {
+        const response = await fetch(`${API_URL}/api/auth/verify-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.id, code })
+        });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Verification failed');
+
+        // Sync verification status locally
+        currentUser.emailVerified = true;
+        localStorage.setItem('Sule_Old_Photos_user', JSON.stringify(currentUser));
+
+        alert('Email verified successfully! Welcome to Sule_Old_Photos.');
+        navigate('onboarding');
+      } catch (err) {
+        verifyErr.innerText = err.message;
+        verifyErr.classList.remove('hidden');
+      }
+    }
+
+    function toggleOnboardTag(element) {
+      element.classList.toggle('border-accent');
+      element.classList.toggle('bg-violet-500/10');
+      element.classList.toggle('text-accent');
+    }
+
+    function finishOnboarding() {
+      initSession();
+    }
+
+    function handleLogout() {
+      currentToken = null;
+      currentUser = null;
+      localStorage.removeItem('Sule_Old_Photos_token');
+      localStorage.removeItem('Sule_Old_Photos_user');
+      if (socket) socket.disconnect();
+      navigate('landing');
+    }
+
+    // LOAD HOME FEED
+    async function loadHomeFeed() {
+      const postsFeed = document.getElementById('posts-feed');
+      postsFeed.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs">Loading publications...</div>';
+
+      try {
+        const res = await fetch(`${API_URL}/api/posts/feed`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Failed to load feed');
+
+        postsFeed.innerHTML = '';
+        if (data.posts.length === 0) {
+          postsFeed.innerHTML = `
+            <div class="text-center py-16 px-4">
+              <i data-lucide="plus-circle" class="w-10 h-10 text-zinc-600 mx-auto mb-3"></i>
+              <h3 class="font-bold text-sm text-slate-300">Feed Empty</h3>
+              <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Follow other curators or tap the upload button to post your first photo.</p>
+            </div>`;
+          lucide.createIcons();
+          return;
+        }
+
+        data.posts.forEach(post => {
+          const mainImg = post.photos[0] || { url: '' };
+          const imgUrl = formatImgUrl(mainImg.url);
+          const avatarUrl = formatImgUrl(post.user.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200');
+
+          const card = document.createElement('div');
+          card.className = "border-b border-zinc-900 pb-6 mb-4 w-full";
+          card.innerHTML = `
+            <div class="flex items-center justify-between px-4 py-3">
+              <div onclick="openProfileView('${post.user.username}')" class="flex items-center gap-3 cursor-pointer">
+                <img src="${avatarUrl}" class="w-9 h-9 rounded-full object-cover">
+                <div>
+                  <h4 class="text-sm font-bold">${post.user.displayName || post.user.username}</h4>
+                  ${post.location ? `<span class="text-[10px] text-accent font-semibold block">${post.location}</span>` : ''}
+                </div>
+              </div>
+              <button onclick="alert('Moderation action logged.')" class="text-slate-500 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+            </div>
+            
+            <div onclick="openPostDetail('${post.id}')" class="cursor-pointer bg-black flex items-center justify-center max-h-[500px] overflow-hidden">
+              <img src="${imgUrl}" class="w-full object-cover">
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-3">
+              <div class="flex items-center gap-4">
+                <button onclick="likeFeedPost('${post.id}', this)" class="hover:scale-105 transition ${post.isLiked ? 'text-red-500' : 'text-slate-200'}">
+                  <i data-lucide="heart" class="w-6 h-6 ${post.isLiked ? 'fill-current' : ''}"></i>
+                </button>
+                <button onclick="openPostDetail('${post.id}')" class="text-slate-200 hover:text-white"><i data-lucide="message-square" class="w-5.5 h-5.5"></i></button>
+                <button onclick="sharePostDM('${post.id}')" class="text-slate-200 hover:text-white"><i data-lucide="send" class="w-5 h-5"></i></button>
+              </div>
+              <button onclick="saveFeedPost('${post.id}', this)" class="${post.isSaved ? 'text-accent' : 'text-slate-200'}">
+                <i data-lucide="bookmark" class="w-5.5 h-5.5 ${post.isSaved ? 'fill-current' : ''}"></i>
+              </button>
+            </div>
+
+            <div class="px-4">
+              ${post.likesCount > 0 ? `<div class="text-xs font-bold mb-1.5">${post.likesCount} likes</div>` : ''}
+              ${post.caption ? `
+                <div class="text-xs leading-relaxed">
+                  <span class="font-bold mr-2">${post.user.username}</span>${post.caption}
+                </div>` : ''}
+              ${post.commentsCount > 0 ? `
+                <button onclick="openPostDetail('${post.id}')" class="text-[11px] text-slate-500 mt-1 block">View all ${post.commentsCount} comments</button>` : ''}
+              <div class="text-[9px] text-slate-600 font-semibold tracking-wider mt-2">${formatTime(post.createdAt)}</div>
+            </div>`;
+          postsFeed.appendChild(card);
+        });
+
+        // Fetch stories
+        const storiesRes = await fetch(`${API_URL}/api/stories/feed`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const storiesData = await storiesRes.json();
+        if (storiesRes.ok) {
+          const container = document.getElementById('stories-feed');
+          // Clean everything except the "Add Story" placeholder (first child)
+          while (container.childNodes.length > 2) {
+            container.removeChild(container.lastChild);
+          }
+          
+          storiesData.forEach(story => {
+            const circle = document.createElement('div');
+            circle.className = "flex flex-col items-center shrink-0 cursor-pointer";
+            circle.onclick = () => alert(`Story by @${story.username}`);
+            circle.innerHTML = `
+              <div class="w-14 h-14 rounded-full border-2 border-accent flex items-center justify-center p-0.5">
+                <img src="${formatImgUrl(story.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200')}" class="w-full h-full rounded-full object-cover">
+              </div>
+              <span class="text-[10px] text-slate-300 mt-1 text-center truncate w-14">${story.username}</span>`;
+            container.appendChild(circle);
+          });
+        }
+
+        lucide.createIcons();
+      } catch (err) {
+        postsFeed.innerHTML = `<div class="text-center py-10 text-red-400 text-xs">${err.message}</div>`;
+      }
+    }
+
+    // TOGGLE LIKE ENDPOINT
+    async function likeFeedPost(postId, buttonElement) {
+      try {
+        const response = await fetch(`${API_URL}/api/posts/${postId}/like`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          loadHomeFeed(); // re-sync
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function saveFeedPost(postId, buttonElement) {
+      try {
+        const response = await fetch(`${API_URL}/api/posts/${postId}/save`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (response.ok) {
+          loadHomeFeed();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // EXPLORE SEARCH GRID
+    async function loadExploreFeed() {
+      const grid = document.getElementById('explore-grid');
+      grid.innerHTML = '<div class="col-span-3 text-center py-10 text-slate-400 text-xs">Loading...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/posts/explore`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          grid.innerHTML = '';
+          data.posts.forEach(post => {
+            const img = post.photos[0] || { thumbnailUrl: '' };
+            const imgUrl = img.thumbnailUrl.startsWith('http') ? img.thumbnailUrl : `${API_URL}${img.thumbnailUrl}`;
+
+            const item = document.createElement('div');
+            item.className = "aspect-square overflow-hidden bg-zinc-950 cursor-pointer";
+            item.onclick = () => openPostDetail(post.id);
+            item.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover hover:scale-105 transition duration-300">`;
+            grid.appendChild(item);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function handleSearchQuery(text) {
+      const resultsDiv = document.getElementById('explore-results');
+      if (!text.trim()) {
+        resultsDiv.classList.add('hidden');
+        return;
+      }
+
+      resultsDiv.classList.remove('hidden');
+      resultsDiv.innerHTML = '<div class="text-xs text-slate-400">Searching...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/posts/search/global?q=${encodeURIComponent(text)}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultsDiv.innerHTML = '';
+
+          // Users found
+          if (data.users.length > 0) {
+            const container = document.createElement('div');
+            container.className = "space-y-2";
+            container.innerHTML = '<span class="text-[9px] font-bold text-slate-500 tracking-wider">CREATORS</span>';
+            data.users.forEach(u => {
+              const row = document.createElement('div');
+              row.className = "flex items-center gap-3 cursor-pointer p-2 hover:bg-zinc-900 rounded";
+              row.onclick = () => {
+                document.getElementById('explore-search').value = '';
+                resultsDiv.classList.add('hidden');
+                openProfileView(u.username);
+              };
+              row.innerHTML = `
+                <img src="${formatImgUrl(u.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100')}" class="w-8 h-8 rounded-full object-cover">
+                <div>
+                  <div class="text-xs font-bold text-slate-200">${u.displayName || u.username}</div>
+                  <div class="text-[10px] text-slate-500">@${u.username}</div>
+                </div>`;
+              container.appendChild(row);
+            });
+            resultsDiv.appendChild(container);
+          }
+
+          if (data.users.length === 0 && data.posts.length === 0) {
+            resultsDiv.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">No results found</div>';
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // UPLOAD LOGIC
+    function triggerFileInput() {
+      document.getElementById('upload-file-input').click();
+    }
+
+    function previewSelectedFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedUploadFile = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById('upload-preview-img').src = event.target.result;
+          document.getElementById('upload-preview-img').classList.remove('hidden');
+          document.getElementById('upload-placeholder-content').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function publishPost() {
+      const errDiv = document.getElementById('upload-error');
+      errDiv.classList.add('hidden');
+
+      if (!selectedUploadFile) {
+        errDiv.innerText = 'Please select a photo first';
+        errDiv.classList.remove('hidden');
+        return;
+      }
+
+      const caption = document.getElementById('upload-caption').value;
+      const location = document.getElementById('upload-location').value;
+      const btn = document.getElementById('upload-publish-btn');
+
+      btn.innerText = 'Publishing...';
+      btn.disabled = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('photos', selectedUploadFile);
+        formData.append('caption', caption);
+        formData.append('location', location);
+
+        const response = await fetch(`${API_URL}/api/posts/create`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` },
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Publish failed');
+
+        alert('Publication successfully published!');
+        
+        // Clean fields
+        document.getElementById('upload-caption').value = '';
+        document.getElementById('upload-location').value = '';
+        document.getElementById('upload-preview-img').classList.add('hidden');
+        document.getElementById('upload-placeholder-content').classList.remove('hidden');
+        selectedUploadFile = null;
+
+        navigateTab('home');
+      } catch (err) {
+        errDiv.innerText = err.message;
+        errDiv.classList.remove('hidden');
+      } finally {
+        btn.innerText = 'Publish Post';
+        btn.disabled = false;
+      }
+    }
+
+    // LOAD ACTIVITY NOTIFICATIONS
+    async function loadNotificationsList() {
+      const list = document.getElementById('notifications-list');
+      list.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs">Loading activity...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/notifications`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          list.innerHTML = '';
+          if (data.length === 0) {
+            list.innerHTML = '<div class="text-xs text-slate-500 text-center py-10">No notifications yet</div>';
+            return;
+          }
+
+          data.forEach(item => {
+            const avatar = item.sender.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100';
+            let actionText = '';
+            if (item.type === 'FOLLOW') actionText = 'started following you.';
+            else if (item.type === 'FOLLOW_BACK') actionText = 'followed you back.';
+            else if (item.type === 'LIKE') actionText = 'liked your photo.';
+            else if (item.type === 'COMMENT') actionText = `commented: "${item.commentText}"`;
+            else if (item.type === 'REPLY') actionText = `replied to your comment: "${item.commentText}"`;
+
+            const row = document.createElement('div');
+            row.className = `flex items-center gap-4 py-3 cursor-pointer ${item.isRead ? 'opacity-70' : 'bg-violet-500/5 font-semibold'}`;
+            row.onclick = () => {
+              if (item.postId) openPostDetail(item.postId);
+              else openProfileView(item.sender.username);
+            };
+            row.innerHTML = `
+              <img src="${avatar}" class="w-10 h-10 rounded-full object-cover">
+              <div class="flex-1">
+                <span class="text-xs text-slate-200 font-bold">${item.sender.displayName || item.sender.username}</span>
+                <span class="text-xs text-slate-400">${actionText}</span>
+                <div class="text-[9px] text-slate-600 mt-1">${formatTime(item.createdAt)}</div>
+              </div>`;
+            list.appendChild(row);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function markAllNotificationsRead() {
+      try {
+        await fetch(`${API_URL}/api/notifications/read-all`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        loadNotificationsList();
+        fetchBadgeCount();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // FETCH ACTIVITY BADGE COUNT
+    async function fetchBadgeCount() {
+      try {
+        const res = await fetch(`${API_URL}/api/notifications/badge-count`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const badge = document.getElementById('badge-count-activity');
+          if (data.count > 0) {
+            badge.innerText = data.count;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+      } catch (err) {
+        // silent
+      }
+    }
+
+    // PROFILE TAB
+    let activeProfileUserId = null;
+    let activeProfileUsername = null;
+
+    async function loadOwnProfile() {
+      openProfileView(currentUser.username);
+    }
+
+    async function openProfileView(username) {
+      navigateTab('profile');
+      
+      const grid = document.getElementById('profile-grid');
+      grid.innerHTML = '<div class="col-span-3 text-center py-10 text-slate-400 text-xs">Loading profile...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/users/${username}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          activeProfileUserId = data.id;
+          activeProfileUsername = data.username;
+          // Populate fields
+          document.getElementById('profile-avatar').src = formatImgUrl(data.profile.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200');
+          document.getElementById('profile-displayname').innerText = data.profile.displayName;
+          document.getElementById('profile-username').innerText = `@${data.username}`;
+          document.getElementById('profile-bio').innerText = data.profile.bio || '';
+          
+          const webLink = document.getElementById('profile-website');
+          if (data.profile.website) {
+            webLink.innerText = data.profile.website;
+            webLink.href = `http://${data.profile.website}`;
+            webLink.classList.remove('hidden');
+          } else {
+            webLink.classList.add('hidden');
+          }
+
+          document.getElementById('stat-posts').innerText = data.counts.posts;
+          document.getElementById('stat-followers').innerText = data.counts.followers;
+          document.getElementById('stat-following').innerText = data.counts.following;
+
+          // Configure follow buttons
+          const followBtn = document.getElementById('profile-follow-toggle-btn');
+          const editBtn = document.getElementById('profile-edit-btn');
+
+          if (username.toLowerCase() === currentUser.username.toLowerCase()) {
+            followBtn.classList.add('hidden');
+            editBtn.classList.remove('hidden');
+          } else {
+            editBtn.classList.add('hidden');
+            followBtn.classList.remove('hidden');
+            if (data.isFollowing) {
+              followBtn.innerText = 'Following';
+              followBtn.className = "flex-1 h-9 rounded bg-zinc-900 border border-zinc-850 text-slate-200 text-xs font-semibold hover:bg-zinc-800 transition";
+            } else {
+              followBtn.innerText = 'Follow';
+              followBtn.className = "flex-1 h-9 rounded bg-accent text-white text-xs font-semibold hover:bg-violet-500 transition";
+            }
+          }
+
+          // Fetch Grid publications
+          const postsRes = await fetch(`${API_URL}/api/posts/user/${data.id}`, {
+            headers: { 'Authorization': `Bearer ${currentToken}` }
+          });
+          const postsData = await postsRes.json();
+          if (postsRes.ok) {
+            grid.innerHTML = '';
+            const list = postsData.posts;
+            
+            if (list.length === 0) {
+              grid.innerHTML = '<div class="col-span-3 text-center py-10 text-slate-500 text-xs">No publications yet</div>';
+              return;
+            }
+
+            list.forEach(post => {
+              const photo = post.photos[0] || { thumbnailUrl: '' };
+              const imgUrl = formatImgUrl(photo.thumbnailUrl || photo.url);
+
+              const cell = document.createElement('div');
+              cell.className = "aspect-square overflow-hidden bg-zinc-950 cursor-pointer";
+              cell.onclick = () => openPostDetail(post.id);
+              cell.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover hover:opacity-80 transition">`;
+              grid.appendChild(cell);
+            });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function toggleProfileFollow() {
+      if (!activeProfileUserId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/users/${activeProfileUserId}/follow`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          openProfileView(activeProfileUsername);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // POST DETAILS MODAL
+    async function openPostDetail(postId) {
+      activePostId = postId;
+      const modal = document.getElementById('modal-post');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('detail-comments').innerHTML = '<div class="text-xs text-slate-400">Loading critiques...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/posts/${postId}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('detail-avatar').src = formatImgUrl(data.user.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200');
+          document.getElementById('detail-name').innerText = data.user.displayName || data.user.username;
+          document.getElementById('detail-location').innerText = data.location || '';
+          
+          const mainImg = data.photos[0] || { url: '' };
+          document.getElementById('detail-img').src = formatImgUrl(mainImg.url);
+
+          const likeBtn = document.getElementById('detail-like-btn');
+          if (data.isLiked) {
+            likeBtn.className = "text-red-500 p-1 hover:scale-105 transition";
+            likeBtn.innerHTML = '<i data-lucide="heart" class="w-6 h-6 fill-current"></i>';
+          } else {
+            likeBtn.className = "text-slate-200 p-1 hover:scale-105 transition";
+            likeBtn.innerHTML = '<i data-lucide="heart" class="w-6 h-6"></i>';
+          }
+
+          document.getElementById('detail-likes-count').innerText = `${data.likesCount} likes`;
+
+          // Render critique list
+          const commRes = await fetch(`${API_URL}/api/comments/${postId}`, {
+            headers: { 'Authorization': `Bearer ${currentToken}` }
+          });
+          const commData = await commRes.json();
+          if (commRes.ok) {
+            const commentsContainer = document.getElementById('detail-comments');
+            commentsContainer.innerHTML = '';
+            if (commData.length === 0) {
+              commentsContainer.innerHTML = '<div class="text-[11px] text-slate-500">No critiques yet. Share your thoughts!</div>';
+              lucide.createIcons();
+              return;
+            }
+
+            commData.forEach(comm => {
+              const row = document.createElement('div');
+              row.className = "flex gap-3 text-xs align-top";
+              row.innerHTML = `
+                <img src="${comm.user.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" class="w-7 h-7 rounded-full object-cover mt-0.5 cursor-pointer" onclick="closePostDetail(); openProfileView('${comm.user.username}')">
+                <div>
+                  <div>
+                    <span class="font-bold text-slate-200 mr-2 cursor-pointer hover:underline" onclick="closePostDetail(); openProfileView('${comm.user.username}')">${comm.user.username}</span>
+                    <span class="text-slate-300">${comm.text}</span>
+                  </div>
+                  <div class="text-[9px] text-slate-600 font-semibold tracking-wider mt-1">${formatTime(comm.createdAt)}</div>
+                </div>`;
+              commentsContainer.appendChild(row);
+            });
+          }
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function closePostDetail() {
+      document.getElementById('modal-post').classList.remove('flex');
+      document.getElementById('modal-post').classList.add('hidden');
+      activePostId = null;
+      loadHomeFeed(); // sync counts
+    }
+
+    async function togglePostLike() {
+      if (!activePostId) return;
+      try {
+        const response = await fetch(`${API_URL}/api/posts/${activePostId}/like`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (response.ok) {
+          openPostDetail(activePostId); // refresh modal details
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function submitDetailComment() {
+      const text = document.getElementById('detail-comment-input').value;
+      if (!text.trim() || !activePostId) return;
+
+      try {
+        const response = await fetch(`${API_URL}/api/comments/${activePostId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text })
+        });
+        if (response.ok) {
+          document.getElementById('detail-comment-input').value = '';
+          openPostDetail(activePostId);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // SHARE IN DIALOGUE FLOW
+    async function sharePostDM(postId) {
+      // Direct messaging helper
+      const contactUsername = prompt("Type the username of the curator to send post to:");
+      if (!contactUsername) return;
+
+      try {
+        // Find user first
+        const searchRes = await fetch(`${API_URL}/api/posts/search/global?q=${contactUsername}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const searchData = await searchRes.json();
+        const found = searchData.users.find(u => u.username.toLowerCase() === contactUsername.toLowerCase());
+        
+        if (!found) {
+          alert('User not found');
+          return;
+        }
+
+        // Open chat conversation
+        const convRes = await fetch(`${API_URL}/api/chats/conversation`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ recipientIds: [found.id] })
+        });
+        const convData = await convRes.json();
+
+        if (convRes.ok) {
+          // Send DM shared post
+          await fetch(`${API_URL}/api/chats/${convData.id}/message`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${currentToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: 'Shared a post with you',
+              sharedPostId: postId
+            })
+          });
+          alert('Publication shared successfully in Direct Messages!');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // DIRECT MESSAGING DIALOGUES
+    function openMessaging() {
+      navigateTab('chat');
+    }
+
+    async function loadDMInbox() {
+      const inbox = document.getElementById('chats-list');
+      inbox.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs">Loading dialogues...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/chats`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          inbox.innerHTML = '';
+          if (data.length === 0) {
+            inbox.innerHTML = '<div class="text-xs text-slate-500 text-center py-12">No active conversations. Start a chat.</div>';
+            return;
+          }
+
+          data.forEach(chat => {
+            const recipient = chat.participants[0] || { displayName: 'Group', avatarUrl: '', isOnline: false };
+            const title = chat.isGroup ? chat.name : recipient.displayName;
+            const avatar = chat.isGroup ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100' : recipient.avatarUrl;
+
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-4 p-4 hover:bg-zinc-900 cursor-pointer transition";
+            row.onclick = () => openChatRoom(chat.id, title, avatar);
+            row.innerHTML = `
+              <div class="relative">
+                <img src="${avatar}" class="w-11 h-11 rounded-full object-cover">
+                ${recipient.isOnline ? `<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-obsidian"></div>` : ''}
+              </div>
+              <div class="flex-1">
+                <div class="text-xs font-bold text-slate-200">${title}</div>
+                <div class="text-xs text-slate-500 mt-1 truncate">${chat.lastMessage ? chat.lastMessage.text : 'Click to send messages'}</div>
+              </div>`;
+            inbox.appendChild(row);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function startNewChat() {
+      const username = prompt("Start conversation with (username):");
+      if (!username) return;
+
+      try {
+        const searchRes = await fetch(`${API_URL}/api/posts/search/global?q=${username}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const searchData = await searchRes.json();
+        const found = searchData.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+
+        if (!found) {
+          alert('User not found');
+          return;
+        }
+
+        const convRes = await fetch(`${API_URL}/api/chats/conversation`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ recipientIds: [found.id] })
+        });
+        const convData = await convRes.json();
+        if (convRes.ok) {
+          openChatRoom(convData.id, found.displayName || found.username, found.avatarUrl);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // ACTIVE CHAT ROOM
+    async function openChatRoom(chatId, title, avatar) {
+      activeChatRoomId = chatId;
+      navigateTab('chatroom');
+
+      document.getElementById('chatroom-title').innerText = title;
+      document.getElementById('chatroom-avatar').src = avatar;
+
+      const stream = document.getElementById('chatroom-stream');
+      stream.innerHTML = '<div class="text-center py-6 text-slate-400 text-[11px]">Syncing thread...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/chats/${chatId}/messages`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          stream.innerHTML = '';
+          data.forEach(msg => {
+            const isSelf = msg.sender.id === currentUser.id;
+            const bubble = document.createElement('div');
+            bubble.className = `flex max-w-[70%] items-end gap-2 text-xs ${isSelf ? 'self-end flex-row-reverse' : 'self-start'}`;
+            
+            // Check if shared post attachment exists
+            let sharedPostHtml = '';
+            if (msg.sharedPost) {
+              sharedPostHtml = `
+                <div onclick="openPostDetail('${msg.sharedPost.id}')" class="bg-zinc-900 border border-zinc-800 rounded-lg p-2 mb-2 w-44 cursor-pointer">
+                  <img src="${msg.sharedPost.thumbnailUrl.startsWith('http') ? msg.sharedPost.thumbnailUrl : `${API_URL}${msg.sharedPost.thumbnailUrl}`}" class="w-full h-24 object-cover rounded mb-2">
+                  <div class="font-bold text-[10px]">@${msg.sharedPost.username}</div>
+                  <div class="text-[9px] text-slate-400 truncate">${msg.sharedPost.caption || ''}</div>
+                </div>`;
+            }
+
+            bubble.innerHTML = `
+              ${!isSelf ? `<img src="${msg.sender.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" class="w-7 h-7 rounded-full object-cover">` : ''}
+              <div>
+                ${sharedPostHtml}
+                ${msg.text ? `<div class="p-3 rounded-2xl ${isSelf ? 'bg-accent text-white rounded-br-none' : 'bg-cardDark text-slate-200 rounded-bl-none'}">${msg.text}</div>` : ''}
+              </div>`;
+            stream.appendChild(bubble);
+          });
+          stream.scrollTop = stream.scrollHeight;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function sendChatMessage() {
+      const text = document.getElementById('chat-input-text').value;
+      if (!text.trim() || !activeChatRoomId) return;
+
+      try {
+        const response = await fetch(`${API_URL}/api/chats/${activeChatRoomId}/message`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text })
+        });
+        if (response.ok) {
+          document.getElementById('chat-input-text').value = '';
+          openChatRoom(activeChatRoomId, document.getElementById('chatroom-title').innerText, document.getElementById('chatroom-avatar').src);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function handleChatKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    // ADMIN CONSOLE INTERACTION
+    async function loadAdminConsole() {
+      const metricsContainer = document.getElementById('admin-metrics-container');
+      const reportsContainer = document.getElementById('admin-reports-container');
+      
+      metricsContainer.innerHTML = '<div class="col-span-3 text-center py-6 text-slate-400 text-xs">Loading analytics...</div>';
+      reportsContainer.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">Loading flags queue...</div>';
+
+      try {
+        const statsRes = await fetch(`${API_URL}/api/admin/stats`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const statsData = await statsRes.json();
+        if (statsRes.ok) {
+          const metrics = statsData.metrics;
+          metricsContainer.innerHTML = `
+            <div class="bg-cardDark border border-zinc-850 p-5 rounded-lg text-center">
+              <span class="block text-3xl font-extrabold text-slate-100">${metrics.totalUsers}</span>
+              <span class="text-[10px] font-bold text-slate-400 tracking-wider">REGISTRATIONS</span>
+            </div>
+            <div class="bg-cardDark border border-zinc-850 p-5 rounded-lg text-center">
+              <span class="block text-3xl font-extrabold text-slate-100">${metrics.totalPosts}</span>
+              <span class="text-[10px] font-bold text-slate-400 tracking-wider">UPLOADS</span>
+            </div>
+            <div class="bg-cardDark border border-zinc-850 p-5 rounded-lg text-center border-l-4 border-l-red-500">
+              <span class="block text-3xl font-extrabold text-red-400">${metrics.pendingReports}</span>
+              <span class="text-[10px] font-bold text-slate-400 tracking-wider">OPEN REPORTS</span>
+            </div>`;
+        }
+
+        const reportsRes = await fetch(`${API_URL}/api/admin/reports`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const reportsData = await reportsRes.json();
+        if (reportsRes.ok) {
+          reportsContainer.innerHTML = '';
+          const pending = reportsData.filter(r => r.status === 'PENDING');
+          
+          if (pending.length === 0) {
+            reportsContainer.innerHTML = '<div class="text-xs text-slate-500 text-center py-6">All reports cleared. Moderate queue clean.</div>';
+            return;
+          }
+
+          pending.forEach(rep => {
+            const card = document.createElement('div');
+            card.className = "bg-cardDark border border-zinc-850 p-4 rounded-xl";
+            
+            let reportedContentHtml = '';
+            if (rep.reportedPost) {
+              reportedContentHtml = `
+                <div class="mt-3 p-3 bg-zinc-950 rounded border border-zinc-900 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img src="${rep.reportedPost.photos[0]?.url.startsWith('http') ? rep.reportedPost.photos[0].url : `${API_URL}${rep.reportedPost.photos[0]?.url}`}" class="w-12 h-12 object-cover rounded">
+                    <div>
+                      <div class="text-[10px] font-bold text-slate-500">FLAGGED CONTENT</div>
+                      <div class="text-xs italic text-slate-300">"${rep.reportedPost.caption || 'No caption'}"</div>
+                    </div>
+                  </div>
+                  <button onclick="adminDeletePost('${rep.reportedPost.id}')" class="px-3 py-1.5 bg-red-500 text-white rounded text-[11px] font-bold hover:bg-red-600 transition">Remove Post</button>
+                </div>`;
+            }
+
+            card.innerHTML = `
+              <div class="flex justify-between items-center text-xs pb-2 border-b border-zinc-900">
+                <span class="text-red-400 font-bold bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">REPORT FLAG</span>
+                <span class="text-slate-500">by @${rep.reporter.username}</span>
+              </div>
+              <p class="text-xs text-slate-200 mt-3 font-semibold">Reason: "${rep.reason}"</p>
+              ${reportedContentHtml}
+              <div class="flex justify-end mt-4 pt-3 border-t border-zinc-900">
+                <button onclick="adminResolveReport('${rep.id}')" class="px-3 py-1.5 border border-green-500/30 text-green-400 hover:bg-green-500/10 rounded text-[11px] font-bold transition">Dismiss Report</button>
+              </div>`;
+            reportsContainer.appendChild(card);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function adminResolveReport(id) {
+      try {
+        const res = await fetch(`${API_URL}/api/admin/reports/${id}/resolve`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          alert('Report marked as resolved');
+          loadAdminConsole();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function adminDeletePost(postId) {
+      if (!confirm('Are you sure you want to delete this content?')) return;
+      try {
+        const res = await fetch(`${API_URL}/api/admin/posts/${postId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          alert('Post removed from system');
+          loadAdminConsole();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // HELPER FORMATTING
+    function formatTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatImgUrl(url, defaultUrl) {
+      if (!url) return defaultUrl || '';
+      if (url.startsWith('http')) return url;
+      if (url.startsWith('/uploads')) return `${API_URL}${url}`;
+      return url;
+    }
+
+    // EDIT PROFILE FUNCTIONS
+    let selectedEditAvatarFile = null;
+
+    function openEditProfileModal() {
+      const modal = document.getElementById('modal-edit-profile');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('edit-profile-error').classList.add('hidden');
+
+      // Populate current user data
+      document.getElementById('edit-profile-avatar-preview').src = formatImgUrl(currentUser.profile.avatarUrl, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200');
+      document.getElementById('edit-profile-displayname').value = currentUser.profile.displayName || '';
+      document.getElementById('edit-profile-website').value = currentUser.profile.website || '';
+      document.getElementById('edit-profile-bio').value = currentUser.profile.bio || '';
+      document.getElementById('edit-profile-private').checked = currentUser.isPrivate || false;
+
+      // Simulated defaults
+      document.getElementById('edit-profile-gender').value = 'male';
+      document.getElementById('edit-profile-phone').value = '';
+      document.getElementById('edit-profile-category').value = 'Photographer';
+      
+      selectedEditAvatarFile = null;
+      document.getElementById('edit-profile-avatar-input').value = '';
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('modal-edit-profile').classList.remove('flex');
+      document.getElementById('modal-edit-profile').classList.add('hidden');
+    }
+
+    function triggerEditAvatarInput() {
+      document.getElementById('edit-profile-avatar-input').click();
+    }
+
+    function previewEditAvatar(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedEditAvatarFile = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById('edit-profile-avatar-preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function handleEditProfileSubmit(e) {
+      e.preventDefault();
+      const errDiv = document.getElementById('edit-profile-error');
+      errDiv.classList.add('hidden');
+
+      const displayName = document.getElementById('edit-profile-displayname').value;
+      const website = document.getElementById('edit-profile-website').value;
+      const bio = document.getElementById('edit-profile-bio').value;
+      const isPrivate = document.getElementById('edit-profile-private').checked;
+
+      try {
+        const formData = new FormData();
+        formData.append('displayName', displayName);
+        formData.append('website', website);
+        formData.append('bio', bio);
+        formData.append('isPrivate', isPrivate ? 'true' : 'false');
+
+        if (selectedEditAvatarFile) {
+          formData.append('avatar', selectedEditAvatarFile);
+        }
+
+        const response = await fetch(`${API_URL}/api/users/profile/update`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${currentToken}` },
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Failed to update profile');
+
+        // Sync local current user session
+        currentUser.profile = data.profile;
+        currentUser.isPrivate = isPrivate;
+        localStorage.setItem('Sule_Old_Photos_user', JSON.stringify(currentUser));
+
+        alert('Profile details successfully updated!');
+        closeEditProfileModal();
+        
+        // Reload profile tab views
+        openProfileView(currentUser.username);
+      } catch (err) {
+        errDiv.innerText = err.message;
+        errDiv.classList.remove('hidden');
+      }
+    }
+
+    // FLOATING CHATBOT WIDGET CONTROLLERS
+    function toggleChatbotPanel() {
+      const panel = document.getElementById('chatbot-panel');
+      panel.classList.toggle('hidden');
+      panel.classList.toggle('flex');
+      if (panel.classList.contains('flex')) {
+        document.getElementById('chatbot-input').focus();
+        // scroll to bottom
+        const msgs = document.getElementById('chatbot-messages');
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    }
+
+    function handleChatbotKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendChatbotMessage();
+      }
+    }
+
+    function appendUserMessage(text) {
+      const msgs = document.getElementById('chatbot-messages');
+      const bubble = document.createElement('div');
+      bubble.className = "self-end max-w-[85%] p-3 bg-accent text-white rounded-2xl rounded-br-none";
+      bubble.innerText = text;
+      msgs.appendChild(bubble);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function appendBotMessage(text, showOptions = false) {
+      const msgs = document.getElementById('chatbot-messages');
+      const bubble = document.createElement('div');
+      bubble.className = "self-start max-w-[85%] p-3 bg-zinc-900 border border-zinc-850 rounded-2xl rounded-bl-none text-slate-300 flex flex-col gap-2";
+      
+      let optionsHtml = '';
+      if (showOptions) {
+        optionsHtml = `
+          <div class="flex gap-2 mt-2 pt-2 border-t border-zinc-800">
+            <button onclick="handleBotOption('Yes')" class="px-3 py-1 bg-accent text-white rounded text-[10px] font-bold hover:bg-violet-500 transition">Yes</button>
+            <button onclick="handleBotOption('No')" class="px-3 py-1 bg-zinc-800 text-slate-300 rounded text-[10px] font-bold hover:bg-zinc-700 transition">No</button>
+          </div>`;
+      }
+
+      bubble.innerHTML = `<div>${text}</div>${optionsHtml}`;
+      msgs.appendChild(bubble);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function handleBotOption(option) {
+      appendUserMessage(option);
+      setTimeout(() => {
+        if (option === 'Yes') {
+          appendBotMessage("Stop confusing me! Call Mr. Sule for help, and make sure to give him 200 shillings for further assistance!");
+        } else {
+          appendBotMessage("Thank you! Welcome back.");
+        }
+      }, 500);
+    }
+
+    function sendChatbotMessage() {
+      const input = document.getElementById('chatbot-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendUserMessage(text);
+      input.value = '';
+
+      // Processing chatbot replies with 500ms delay to simulate typing
+      setTimeout(() => {
+        const query = text.toLowerCase();
+
+        // 1. Suleban / afi / suleiman / sule
+        if (query.includes('suleban') || query.includes('afi') || query.includes('suleiman') || query.includes('sule')) {
+          appendBotMessage("He is the creator of this app, as well as the Co-founder and CEO of LearnWithSule and Sule_Old_Photos. He holds code 01, works as our second photographer, and is a key confidant to many. Please take good care of him!");
+        }
+        // 2. Subane / Mohamed Ibrahim / SBN
+        else if (query.includes('subane') || query.includes('mohamed ibrahim') || query.includes('sbn')) {
+          appendBotMessage("Mohamed Ibrahim, widely known as MD SUBANE, holds code 02. He is the first or main photographer and stands as the earliest homo bethicus in the history of Sule_Old_Photos.");
+        }
+        // 3. Shaban / Shabaan
+        else if (query.includes('shaban') || query.includes('shabaan')) {
+          appendBotMessage("He holds code 04 and is famously known as the 'Man of Origin.' While he is celebrated as the mathematician of the century, he is also jokingly remembered as the worst in history!");
+        }
+        // 4. Mohamednur Xoqsade / Young Xoqsade / Mohamednur Muhumed
+        else if (query.includes('mohamednur xoqsade') || query.includes('young xoqsade') || query.includes('mohamednur muhumed')) {
+          appendBotMessage("He holds code 03 and is one of the best mathematicians of the century! He is a very cool guy, though he struggles a bit with teaching critical mathematical questions, so he definitely has room to improve there.");
+        }
+        // 5. Abdinur / Maqhrib labiste
+        else if (query.includes('abdinur') || query.includes('maqhrib labiste')) {
+          appendBotMessage("He holds code 07 and is one of the closest classmates from the class of 2020, ranking among the absolute best!");
+        }
+        // 6. Boxer / Abdirashid
+        else if (query.includes('boxer') || query.includes('abdirashid')) {
+          appendBotMessage("He holds code 05 and is deeply knowledgeable in literature. As the best public speaker in the class, even mathematicians should visit him to learn public speaking and master literature courses!");
+        }
+        // 7. Adan / Qurbacow / Nirigta
+        else if (query.includes('adan') || query.includes('qurbacow') || query.includes('nirigta')) {
+          appendBotMessage("He is among the best students in the class of 2020! He is a really cool person, though he needs to stop paying too fast for everything.");
+        }
+        // 8. Amin / General / Amin Bishar
+        else if (query.includes('amin') || query.includes('general') || query.includes('amin bishar')) {
+          appendBotMessage("He is recognized as the best student in terms of discipline in the class of 2020. Sadly, he was hit by a motorbike one day while heading to the examination room!");
+        }
+        // 9. Abdallahi / Abdullahi / Abdallah
+        else if (query.includes('abdallahi') || query.includes('abdullahi') || query.includes('abdallah')) {
+          appendBotMessage("He is the undisputed best student in class in terms of noise-making! He is also always trying to win matches in PES or Konami against Suleban.");
+        }
+        // 10. Match Osman, Sahara, Sahara, Naima, etc.
+        else {
+          const checkNames = [
+            'osman', 'oscar', 'dies', 'mohamednur dies', 'mohamed nur dies',
+            'mohamednur abdisalam', 'sahara', 'athar', 'isnina', 'bishara',
+            'abdirizak malele', 'mukhtar', 'najma', 'naima', 'malyun', 'maymuna'
+          ];
+          const matched = checkNames.find(name => query.includes(name));
+          if (matched) {
+            appendBotMessage("They are among the best students of the class of 2020! Would you like more information about him or her?", true);
+          } else {
+            appendBotMessage("I couldn't find any match for that query. Try searching for sule, subane, shaban, amin, or other classmates!");
+          }
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
